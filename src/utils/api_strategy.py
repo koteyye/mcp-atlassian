@@ -5,6 +5,7 @@ import requests
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
 from src.utils import logger, log_method_call
+from src.config import config
 
 
 class APIStrategy(ABC):
@@ -20,6 +21,13 @@ class APIStrategy(ABC):
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         })
+        
+        # Always disable SSL verification for corporate self-signed certificates
+        # This is common for internal corporate Atlassian instances
+        self.session.verify = False
+        import urllib3
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        logger.info("SSL verification disabled for corporate self-signed certificates")
     
     @abstractmethod
     def create(self, data: Dict[str, Any]) -> Dict[str, Any]:

@@ -27,8 +27,10 @@ class MCPAtlassianServer:
         self.jira_api = None
         self.confluence_api = None
         self.command_handler = None
-        # APIs will be initialized after configuration is received
+        # Initialize system commands first
         self._initialize_system_commands()
+        # Try to initialize APIs from environment variables
+        self._try_initialize_from_env()
     
     def _initialize_apis(self):
         """Initialize Jira and Confluence APIs after configuration is set."""
@@ -79,6 +81,26 @@ class MCPAtlassianServer:
         system_handler = SystemCommandHandler()
         self.command_handler = system_handler
         logger.info("System command handler initialized")
+    
+    def _try_initialize_from_env(self):
+        """Try to initialize APIs from environment variables."""
+        try:
+            # Check if we have environment variables
+            jira_config = config.get_jira_config()
+            confluence_config = config.get_confluence_config()
+            
+            has_jira = all([jira_config.get('url'), jira_config.get('username'), jira_config.get('api_token')])
+            has_confluence = all([confluence_config.get('url'), confluence_config.get('username'), confluence_config.get('api_token')])
+            
+            if has_jira or has_confluence:
+                logger.info("Found configuration in environment variables, initializing APIs...")
+                # Set a dummy config to mark as configured
+                config.set_config({'initialized_from_env': True})
+                self._initialize_apis()
+            else:
+                logger.info("No complete configuration found in environment variables")
+        except Exception as e:
+            logger.error(f"Failed to initialize from environment: {str(e)}")
     
     def _initialize_commands(self):
         """Initialize command handlers using Chain of Responsibility pattern."""

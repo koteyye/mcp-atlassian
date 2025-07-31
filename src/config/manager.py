@@ -47,12 +47,13 @@ class ConfigManager:
         jira_config = self.get('jira', {})
         
         # Fallback to environment variables if config is not complete
+        # Support both uppercase and lowercase env vars for RooCode compatibility
         if not jira_config.get('url'):
-            jira_config['url'] = os.getenv('JIRA_URL', jira_config.get('url', ''))
+            jira_config['url'] = os.getenv('jira_url', os.getenv('JIRA_URL', jira_config.get('url', '')))
         if not jira_config.get('username'):
-            jira_config['username'] = os.getenv('JIRA_USERNAME', jira_config.get('username', ''))
+            jira_config['username'] = os.getenv('jira_username', os.getenv('JIRA_USERNAME', jira_config.get('username', '')))
         if not jira_config.get('api_token'):
-            jira_config['api_token'] = os.getenv('JIRA_API_TOKEN', jira_config.get('api_token', ''))
+            jira_config['api_token'] = os.getenv('jira_api_token', os.getenv('JIRA_API_TOKEN', jira_config.get('api_token', '')))
         
         return jira_config
     
@@ -61,18 +62,29 @@ class ConfigManager:
         confluence_config = self.get('confluence', {})
         
         # Fallback to environment variables if config is not complete
+        # Support both uppercase and lowercase env vars for RooCode compatibility
         if not confluence_config.get('url'):
-            confluence_config['url'] = os.getenv('CONFLUENCE_URL', confluence_config.get('url', ''))
+            confluence_config['url'] = os.getenv('confluence_url', os.getenv('CONFLUENCE_URL', confluence_config.get('url', '')))
         if not confluence_config.get('username'):
-            confluence_config['username'] = os.getenv('CONFLUENCE_USERNAME', confluence_config.get('username', ''))
+            confluence_config['username'] = os.getenv('confluence_username', os.getenv('CONFLUENCE_USERNAME', confluence_config.get('username', '')))
         if not confluence_config.get('api_token'):
-            confluence_config['api_token'] = os.getenv('CONFLUENCE_API_TOKEN', confluence_config.get('api_token', ''))
+            confluence_config['api_token'] = os.getenv('confluence_api_token', os.getenv('CONFLUENCE_API_TOKEN', confluence_config.get('api_token', '')))
         
         return confluence_config
     
     def get_logging_config(self) -> Dict[str, str]:
         """Get logging configuration."""
         return self.get('logging', {'level': 'INFO', 'file': 'mcp_server.log'})
+    
+    def is_ssl_disabled(self) -> bool:
+        """Check if SSL verification should be disabled."""
+        # Check environment variable first (for RooCode compatibility)
+        ssl_disable_env = os.getenv('ssl_disable', os.getenv('SSL_DISABLE', ''))
+        if ssl_disable_env:
+            return ssl_disable_env.lower() in ('true', '1', 'yes', 'on')
+        
+        # Check config
+        return self.get('ssl_disable', False)
     
     def is_configured(self) -> bool:
         """Check if configuration has been set."""
