@@ -283,6 +283,20 @@ class MCPAtlassianServer:
                     }
                 },
                 {
+                    'name': 'update_confluence_page',
+                    'description': 'Update an existing Confluence page',
+                    'inputSchema': {
+                        'type': 'object',
+                        'properties': {
+                            'page_id': {'type': 'string', 'description': 'Page ID to update'},
+                            'title': {'type': 'string', 'description': 'New page title'},
+                            'content': {'type': 'string', 'description': 'New page content'},
+                            'space': {'type': 'string', 'description': 'Space key'}
+                        },
+                        'required': ['page_id']
+                    }
+                },
+                {
                     'name': 'get_confluence_page',
                     'description': 'Get a Confluence page by ID',
                     'inputSchema': {

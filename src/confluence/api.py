@@ -40,7 +40,7 @@ class ConfluenceAPI(APIStrategy):
             logger.info(f"Getting page with ID: {page_id}")
             response = self._make_request(
                 'GET',
-                f'{self.api_base}/content/{page_id}?expand=body.storage,space,ancestors'
+                f'{self.api_base}/content/{page_id}?expand=body.storage,space,ancestors,version'
             )
             
             logger.info(f"Response received, status: {response.status_code}")

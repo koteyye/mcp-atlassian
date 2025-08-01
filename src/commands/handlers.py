@@ -129,6 +129,7 @@ class SystemCommandHandler(CommandHandler):
             'create_confluence_page': 'Create a new Confluence page',
             'update_confluence_page': 'Update an existing Confluence page',
             'delete_confluence_page': 'Delete a Confluence page',
+            'get_confluence_page': 'Get a Confluence page by ID',
             'search_confluence_pages': 'Search for Confluence pages with filters',
             'search_confluence_pages_by_parent': 'Search for child pages of a parent page',
             'get_confluence_debug_info': 'Get Confluence debug information'
