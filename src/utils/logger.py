@@ -25,30 +25,21 @@ class Logger:
     def _setup_logger(self):
         """Setup logger configuration."""
         logging_config = config.get_logging_config()
-        level = getattr(logging, logging_config.get('level', 'INFO'))
-        log_file = logging_config.get('file', 'mcp_server.log')
+        level = getattr(logging, logging_config.get('level', 'WARNING'))
         
         self._logger = logging.getLogger('mcp_atlassian')
         self._logger.setLevel(level)
         
-        # Console handler
+        # Console handler only - no file logging
         console_handler = logging.StreamHandler()
         console_handler.setLevel(level)
         
-        # File handler
-        file_handler = logging.FileHandler(log_file)
-        file_handler.setLevel(level)
-        
-        # Formatter
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        )
+        # Simple formatter
+        formatter = logging.Formatter('%(levelname)s - %(message)s')
         console_handler.setFormatter(formatter)
-        file_handler.setFormatter(formatter)
         
         if not self._logger.handlers:
             self._logger.addHandler(console_handler)
-            self._logger.addHandler(file_handler)
     
     def get_logger(self):
         """Get the logger instance."""

@@ -54,6 +54,8 @@ class ConfigManager:
             jira_config['username'] = os.getenv('jira_username', os.getenv('JIRA_USERNAME', jira_config.get('username', '')))
         if not jira_config.get('api_token'):
             jira_config['api_token'] = os.getenv('jira_api_token', os.getenv('JIRA_API_TOKEN', jira_config.get('api_token', '')))
+        if not jira_config.get('auth_type'):
+            jira_config['auth_type'] = os.getenv('jira_auth_type', os.getenv('JIRA_AUTH_TYPE', jira_config.get('auth_type', 'basic')))
         
         return jira_config
     
@@ -69,6 +71,8 @@ class ConfigManager:
             confluence_config['username'] = os.getenv('confluence_username', os.getenv('CONFLUENCE_USERNAME', confluence_config.get('username', '')))
         if not confluence_config.get('api_token'):
             confluence_config['api_token'] = os.getenv('confluence_api_token', os.getenv('CONFLUENCE_API_TOKEN', confluence_config.get('api_token', '')))
+        if not confluence_config.get('auth_type'):
+            confluence_config['auth_type'] = os.getenv('confluence_auth_type', os.getenv('CONFLUENCE_AUTH_TYPE', confluence_config.get('auth_type', 'basic')))
         
         return confluence_config
     

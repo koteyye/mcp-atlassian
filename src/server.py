@@ -14,7 +14,7 @@ from src.commands import (
     CreateJiraIssueCommand, UpdateJiraIssueCommand, DeleteJiraIssueCommand,
     CreateJiraSubtaskCommand, SearchJiraIssuesCommand, GetJiraDebugInfoCommand,
     CreateConfluencePageCommand, UpdateConfluencePageCommand, DeleteConfluencePageCommand,
-    SearchConfluencePagesCommand, SearchConfluencePagesByParentCommand, GetConfluenceDebugInfoCommand,
+    GetConfluencePageCommand, SearchConfluencePagesCommand, SearchConfluencePagesByParentCommand, GetConfluenceDebugInfoCommand,
     JiraCommandHandler, ConfluenceCommandHandler, SystemCommandHandler
 )
 
@@ -38,11 +38,7 @@ class MCPAtlassianServer:
             logger.warning("Configuration not set, APIs cannot be initialized")
             return
         
-        logger.info("Starting API initialization...")
-        logger.info(f"Configuration status: {config.get_configuration_status()}")
-        
         validation = config.validate_configuration()
-        logger.debug(f"Configuration validation: {validation}")
         
         try:
             # Initialize Jira API
@@ -51,9 +47,9 @@ class MCPAtlassianServer:
                 self.jira_api = JiraAPI(
                     jira_config['url'],
                     jira_config['username'],
-                    jira_config['api_token']
+                    jira_config['api_token'],
+                    jira_config.get('auth_type', 'basic')
                 )
-                logger.info(f"Jira API initialized successfully for {jira_config.get('url')}")
             else:
                 logger.warning("Jira configuration incomplete, Jira commands will be unavailable")
             
@@ -63,9 +59,9 @@ class MCPAtlassianServer:
                 self.confluence_api = ConfluenceAPI(
                     confluence_config['url'],
                     confluence_config['username'],
-                    confluence_config['api_token']
+                    confluence_config['api_token'],
+                    confluence_config.get('auth_type', 'basic')
                 )
-                logger.info(f"Confluence API initialized successfully for {confluence_config.get('url')}")
             else:
                 logger.warning("Confluence configuration incomplete, Confluence commands will be unavailable")
         
@@ -80,7 +76,6 @@ class MCPAtlassianServer:
         """Initialize system command handler only."""
         system_handler = SystemCommandHandler()
         self.command_handler = system_handler
-        logger.info("System command handler initialized")
     
     def _try_initialize_from_env(self):
         """Try to initialize APIs from environment variables."""
@@ -93,12 +88,9 @@ class MCPAtlassianServer:
             has_confluence = all([confluence_config.get('url'), confluence_config.get('username'), confluence_config.get('api_token')])
             
             if has_jira or has_confluence:
-                logger.info("Found configuration in environment variables, initializing APIs...")
                 # Set a dummy config to mark as configured
                 config.set_config({'initialized_from_env': True})
                 self._initialize_apis()
-            else:
-                logger.info("No complete configuration found in environment variables")
         except Exception as e:
             logger.error(f"Failed to initialize from environment: {str(e)}")
     
@@ -123,6 +115,7 @@ class MCPAtlassianServer:
                 'create_confluence_page': CreateConfluencePageCommand(self.confluence_api),
                 'update_confluence_page': UpdateConfluencePageCommand(self.confluence_api),
                 'delete_confluence_page': DeleteConfluencePageCommand(self.confluence_api),
+                'get_confluence_page': GetConfluencePageCommand(self.confluence_api),
                 'search_confluence_pages': SearchConfluencePagesCommand(self.confluence_api),
                 'search_confluence_pages_by_parent': SearchConfluencePagesByParentCommand(self.confluence_api),
                 'get_confluence_debug_info': GetConfluenceDebugInfoCommand(self.confluence_api)
@@ -137,7 +130,6 @@ class MCPAtlassianServer:
         system_handler.set_successor(jira_handler).set_successor(confluence_handler)
         
         self.command_handler = system_handler
-        logger.info("Command handlers initialized successfully")
     
     def process_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
         """Process incoming MCP message."""
@@ -152,7 +144,6 @@ class MCPAtlassianServer:
             method = message['method']
             params = message.get('params', {})
             
-            logger.info(f"Processing command: {method}")
             
             # Handle MCP protocol messages
             if method == 'initialize':
@@ -177,24 +168,15 @@ class MCPAtlassianServer:
     
     def _handle_initialize(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Handle MCP initialize request and setup configuration."""
-        logger.info("Handling MCP initialize request")
-        logger.debug(f"Initialize params keys: {list(params.keys())}")
-        
         # Check if configuration is provided in params
         if 'config' in params:
-            logger.info("Received configuration from MCP client")
-            logger.debug(f"Config structure: {params['config'].keys() if isinstance(params['config'], dict) else type(params['config'])}")
             config.set_config(params['config'])
             
             # Initialize APIs after configuration is set
             try:
                 self._initialize_apis()
-                logger.info("Server initialization completed with configuration")
             except Exception as e:
                 logger.error(f"Failed to initialize APIs with provided config: {str(e)}")
-                logger.debug(f"Full error: {traceback.format_exc()}")
-        else:
-            logger.info("No configuration provided in initialize request")
         
         return {
             'protocolVersion': '2024-11-05',
@@ -301,6 +283,17 @@ class MCPAtlassianServer:
                     }
                 },
                 {
+                    'name': 'get_confluence_page',
+                    'description': 'Get a Confluence page by ID',
+                    'inputSchema': {
+                        'type': 'object',
+                        'properties': {
+                            'page_id': {'type': 'string', 'description': 'Page ID'}
+                        },
+                        'required': ['page_id']
+                    }
+                },
+                {
                     'name': 'search_confluence_pages',
                     'description': 'Search for Confluence pages',
                     'inputSchema': {
@@ -355,7 +348,6 @@ class MCPAtlassianServer:
                     'error': 'Missing config in parameters'
                 }
             
-            logger.info("Setting configuration from MCP client")
             config.set_config(params['config'])
             
             # Re-initialize APIs with new configuration
@@ -374,7 +366,6 @@ class MCPAtlassianServer:
     
     def run(self):
         """Run the MCP server on stdio."""
-        logger.info("Starting MCP Atlassian server on stdio")
         
         try:
             for line in sys.stdin:
@@ -408,7 +399,7 @@ class MCPAtlassianServer:
                     print(json.dumps(error_response), flush=True)
                 
         except KeyboardInterrupt:
-            logger.info("Server stopped by user")
+            pass
         except Exception as e:
             logger.error(f"Fatal error: {str(e)}")
             logger.error(f"Traceback: {traceback.format_exc()}")

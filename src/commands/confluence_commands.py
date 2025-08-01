@@ -169,6 +169,36 @@ class SearchConfluencePagesByParentCommand(ConfluenceCommand):
             }
 
 
+class GetConfluencePageCommand(ConfluenceCommand):
+    """Command to get a Confluence page by ID."""
+    
+    def __init__(self, confluence_api):
+        super().__init__(
+            "get_confluence_page",
+            "Get a Confluence page by ID",
+            confluence_api
+        )
+    
+    @log_method_call
+    def execute(self, args: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute get page command."""
+        self.validate_args(args, ['page_id'])
+        
+        try:
+            page = self.confluence_api.get(args['page_id'])
+            return {
+                'success': True,
+                'page': page,
+                'message': f"Page {args['page_id']} retrieved successfully"
+            }
+        except Exception as e:
+            logger.error(f"Failed to get Confluence page: {str(e)}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+
 class GetConfluenceDebugInfoCommand(ConfluenceCommand):
     """Command to get Confluence debug information."""
     

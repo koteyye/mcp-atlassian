@@ -3,7 +3,7 @@ Chain of Responsibility pattern for command processing.
 """
 from typing import Dict, Any, Optional
 from abc import ABC, abstractmethod
-from src.utils import logger, log_method_call
+from src.utils import logger
 
 
 class CommandHandler(ABC):
@@ -45,11 +45,9 @@ class JiraCommandHandler(CommandHandler):
         super().__init__(successor)
         self.jira_commands = jira_commands
     
-    @log_method_call
     def _handle(self, command_name: str, args: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Handle Jira commands."""
         if command_name in self.jira_commands:
-            logger.info(f"Handling Jira command: {command_name}")
             command = self.jira_commands[command_name]
             return command.execute(args)
         return None
@@ -62,11 +60,9 @@ class ConfluenceCommandHandler(CommandHandler):
         super().__init__(successor)
         self.confluence_commands = confluence_commands
     
-    @log_method_call
     def _handle(self, command_name: str, args: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Handle Confluence commands."""
         if command_name in self.confluence_commands:
-            logger.info(f"Handling Confluence command: {command_name}")
             command = self.confluence_commands[command_name]
             return command.execute(args)
         return None
@@ -78,7 +74,6 @@ class SystemCommandHandler(CommandHandler):
     def __init__(self, successor: Optional[CommandHandler] = None):
         super().__init__(successor)
     
-    @log_method_call
     def _handle(self, command_name: str, args: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Handle system commands."""
         if command_name == "ping":

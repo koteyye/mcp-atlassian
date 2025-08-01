@@ -9,8 +9,8 @@ from src.utils import logger, log_method_call, validate_required_fields, JiraIss
 class JiraAPI(APIStrategy):
     """Jira API implementation."""
     
-    def __init__(self, base_url: str, username: str, api_token: str):
-        super().__init__(base_url, username, api_token)
+    def __init__(self, base_url: str, username: str, api_token: str, auth_type: str = 'basic'):
+        super().__init__(base_url, username, api_token, auth_type)
         self.api_version = '3'
         self.api_base = f"/rest/api/{self.api_version}"
     
