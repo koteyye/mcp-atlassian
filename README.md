@@ -30,7 +30,7 @@ pip3 --version
 ### Шаг 1: Скачиваем проект
 
 ```bash
-git clone https://github.com/your-username/mcp-atlassian.git
+git clone https://github.com/koteyye/mcp-atlassian.git
 cd mcp-atlassian
 ```
 
@@ -86,12 +86,13 @@ python -m pip install -r requirements.txt
       "command": "python3",
       "args": ["/полный/путь/к/проекту/mcp-atlassian/main.py"],
       "env": {
-        "JIRA_URL": "https://your-domain.atlassian.net",
-        "JIRA_USERNAME": "your-email@example.com",
-        "JIRA_API_TOKEN": "your-jira-api-token",
-        "CONFLUENCE_URL": "https://your-domain.atlassian.net/wiki",
-        "CONFLUENCE_USERNAME": "your-email@example.com",
-        "CONFLUENCE_API_TOKEN": "your-confluence-api-token"
+        "jira_url": "https://your-domain.atlassian.net",
+        "jira_username": "your address",
+        "jira_api_token": "your token",
+        "confluence_url": "https://your-domain.atlassian.net/wiki",
+        "confluence_username": "your address",
+        "confluence_api_token": "your token",
+        "confluence_auth_type": "bearer / basic"
       }
     }
   }
@@ -110,12 +111,13 @@ python -m pip install -r requirements.txt
       "command": "python3",
       "args": ["/полный/путь/к/проекту/mcp-atlassian/main.py"],
       "env": {
-        "JIRA_URL": "https://your-domain.atlassian.net",
-        "JIRA_USERNAME": "your-email@example.com",
-        "JIRA_API_TOKEN": "your-jira-api-token",
-        "CONFLUENCE_URL": "https://your-domain.atlassian.net/wiki",
-        "CONFLUENCE_USERNAME": "your-email@example.com",
-        "CONFLUENCE_API_TOKEN": "your-confluence-api-token"
+        "jira_url": "https://your-domain.atlassian.net",
+        "jira_username": "your address",
+        "jira_api_token": "your token",
+        "confluence_url": "https://your-domain.atlassian.net/wiki",
+        "confluence_username": "your address",
+        "confluence_api_token": "your token",
+        "confluence_auth_type": "bearer / basic"
       }
     }
   }
